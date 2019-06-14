@@ -1,9 +1,12 @@
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.*;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
@@ -11,9 +14,8 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.Random;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.*;
 
@@ -40,8 +42,10 @@ import kr.ac.konkuk.ccslab.cm.util.CMUtil;
 
 public class CMWinClient extends JFrame implements ActionListener {
 
-	Game game;
+	
 	String userName = "";
+	String level = "";
+	String chatMsg = "";
 	
 	private static final long serialVersionUID = 1L;
 	//private JTextArea m_outTextArea;
@@ -49,8 +53,12 @@ public class CMWinClient extends JFrame implements ActionListener {
 	private JTextField m_inTextField;
 	private JButton m_startStopButton;
 	private JButton m_loginLogoutButton;
-	private JButton m_clearButton, m_levelButton1, m_levelButton2, m_levelButton3, m_leaveButton;
+	
+	private JButton m_clearButton, m_levelButton1, m_levelButton2, m_levelButton3, m_leaveButton, m_GameStartButton;
 	private JPanel m_hangmanPanel;
+
+	
+	
 	//private JPanel m_leftButtonPanel;
 	//private JScrollPane m_westScroll;
 	private JButton m_composeSNSContentButton;
@@ -67,7 +75,7 @@ public class CMWinClient extends JFrame implements ActionListener {
 	private CMClientStub m_clientStub;
 	private CMWinClientEventHandler m_eventHandler;
 	
-	CMWinClient()
+	CMWinClient() throws IOException
 	{		
 		MyKeyListener cmKeyListener = new MyKeyListener();
 		MyActionListener cmActionListener = new MyActionListener();
@@ -103,8 +111,6 @@ public class CMWinClient extends JFrame implements ActionListener {
 		JPanel panel = new JPanel();
 		getContentPane().add(panel, BorderLayout.NORTH);
 		
-		JPanel m_hangmanPanel = new JPanel();
-		
 		
 		JPanel topButtonPanel = new JPanel();
 		topButtonPanel.setBackground(new Color(220,220,220));
@@ -120,6 +126,12 @@ public class CMWinClient extends JFrame implements ActionListener {
 		m_loginLogoutButton = new JButton("유저 로그인");
 		m_loginLogoutButton.addActionListener(cmActionListener);
 		topButtonPanel.add(m_loginLogoutButton);
+		
+		// 게임시작
+		m_GameStartButton = new JButton("문제");
+		m_GameStartButton.addActionListener(this);
+		m_GameStartButton.setVisible(false);
+		topButtonPanel.add(m_GameStartButton);
 		
 		// 게임방 나가기 (g1으로 변경)
 		m_leaveButton = new JButton("대기실");
@@ -147,6 +159,24 @@ public class CMWinClient extends JFrame implements ActionListener {
 		m_clearButton = new JButton("clear");
 		m_clearButton.addActionListener(this);
 		topButtonPanel.add(m_clearButton);
+		
+		//hangman 그림 추가하기
+//		Card = new CardLayout();
+//		JPanel m_hangmanPanel = new JPanel();
+//		m_hangmanPanel.setLayout(Card);
+//		
+//		card1 = new MyBackPanel("image/man1.png");
+//		card2 = new MyBackPanel("image/man2.png");
+//		
+//		JPanel card0 = new JPanel();
+//		card0.setBackground(Color.cyan);
+//		m_hangmanPanel.add(card0, "stage1");
+//
+//	    //m_hangmanPanel.add(card1, "stage1");
+//	    
+//	    getContentPane().add(m_hangmanPanel, BorderLayout.EAST);
+//	    Card.show(card0, "stage1");
+		
 		
 		
 		/*
@@ -1360,7 +1390,7 @@ public class CMWinClient extends JFrame implements ActionListener {
 			//String txt = "<" + userName + ">dh: " + strMessage + "\n";
 			
 			// 유저 이름 설정
-			game.setUserName(userName);
+//			game.setUserName(userName);
 			//game.textArea.append(txt);
 			
 		}
@@ -3190,7 +3220,7 @@ public class CMWinClient extends JFrame implements ActionListener {
 				m_clientStub.loginCM(user, strPassword);
 				
 				// 유저이름 설정
-				game.setUserName(user);
+//				game.setUserName(user);
 				System.out.println("user name: " + user);
 			}
 		}
@@ -4426,7 +4456,7 @@ public class CMWinClient extends JFrame implements ActionListener {
 		
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		CMWinClient client = new CMWinClient();
 		CMClientStub cmStub = client.getClientStub();
@@ -4439,21 +4469,47 @@ public class CMWinClient extends JFrame implements ActionListener {
 			m_outTextPane.setText("");
 		}
 		else if (e.getSource() == m_inTextField) {
-			
+			chatMsg = m_inTextField.getText().trim();
 			m_clientStub.chat("/g", m_inTextField.getText());
 		}
 		
 		else if (e.getSource() == m_levelButton1) {
 			m_clientStub.changeGroup("g2");	
+			level = "g2";
 		}
 		else if (e.getSource() == m_levelButton2) {
 			m_clientStub.changeGroup("g3");	
+			level = "g3";
 		}
 		else if (e.getSource() == m_levelButton3) {
 			m_clientStub.changeGroup("g4");	
+			level = "g4";
 		}
 		else if (e.getSource() == m_leaveButton) {
 			m_clientStub.changeGroup("g1");
+			level = "g1";
+		}
+		else if (e.getSource() == m_GameStartButton) {
+			HangMan Game;
+			try {
+				Game = new HangMan();
+			
+			int lv = 0;
+			
+			if (level.equals("g2"))
+				lv = 1;
+			else if (level.equals("g3"))
+				lv = 2;
+			else if (level.equals("g4"))
+				lv = 3;
+				
+			if (lv != 0)
+	          Game.run(lv);
+			
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		
 		
@@ -4465,6 +4521,292 @@ public class CMWinClient extends JFrame implements ActionListener {
 		m_levelButton2.setVisible(status);
 		m_levelButton3.setVisible(status);
 		m_leaveButton.setVisible(status);
+		m_GameStartButton.setVisible(status);
 	}
+	
+	
+	public class HangMan {
+
+		int hiddenChar; // 빈칸 개수
+		StringBuffer hiddenWord; // 빈칸뚫은 단어 저장
+		String newWord; // 선출된 랜덤 단어.
+		Scanner scanner;
+		int failCount; // 틀린 횟수
+		ArrayList<String> word1;
+		ArrayList<String> word2;
+		ArrayList<String> word3;
+		ArrayList<String> temp;
+		Random rand;
+		
+		public HangMan() throws FileNotFoundException{
+			this.word1 = new ArrayList<String>();
+			this.word2 = new ArrayList<String>();
+			this.word3 = new ArrayList<String>();
+			this.temp = new ArrayList<String>();
+			
+			
+		}
+		
+		public void readFile() throws FileNotFoundException {
+			File file = new File("level_1.txt");
+			Scanner fileScan = new Scanner(file);
+			Scanner scan = new Scanner(System.in);
+			
+			while(fileScan.hasNextLine()) { 
+				String str = fileScan.nextLine().trim();
+				word1.add(str);
+			}
+			
+			file = new File("level_2.txt");
+			fileScan = new Scanner(file);
+			
+			while(fileScan.hasNextLine()) { 
+				String str = fileScan.nextLine().trim();
+				word2.add(str);
+			}
+			
+			file = new File("level_3.txt");
+			fileScan = new Scanner(file);
+			
+			while(fileScan.hasNextLine()) { 
+				String str = fileScan.nextLine().trim();
+				word3.add(str);
+			}
+		}
+		
+		
+		public void run(int lv) throws FileNotFoundException{
+			readFile();
+		      
+//		    	  System.out.println("Game Start");
+		    	  printMessage("☆ 게임 시작 ☆ \n");
+		    	  System.out.println("☆ 게임 시작 ☆ \n");
+		    	  
+		    	  
+//			      System.out.print("Difficulty? (1-5)>>");
+//		    	  printMessage("난이도 선택 (1-5 중 하나 입력): ");
+			      
+//			      if (chatMsg != null)
+//			    	  hiddenChar = chatMsg.charAt(0);
+//			      if (hiddenChar < 1 || hiddenChar > 5) {
+//			         System.out.println("Error!! :: choose only 1-5");
+//			         return;
+//			      }
+		    	  
+		    	  if (lv == 1)
+		    		  temp = word1;
+		    	  else if (lv == 2)
+		    		  temp = word2;
+		    	  else if (lv == 3)
+		    		  temp = word3;
+		    	  
+			      rand = new Random();
+			      int random = rand.nextInt(temp.size());
+			      
+			      newWord = temp.get(random);
+	    		  hiddenChar = newWord.length()-1;
+
+		    	  
+		    	  hiddenWord = new StringBuffer(newWord);
+		    	  Random ran = new Random();
+		    	  
+		    	  for(int i=0; i<hiddenChar; i++){
+		    		  int index = ran.nextInt(newWord.length());//단어길이의 난수발생
+		    		  char c = newWord.charAt(index);// 난수번째의 글자 저장. c에.
+		    		  for(int j=0; j<newWord.length(); j++){
+		    			  if(hiddenWord.charAt(j)==c) // j번째 글자가 c랑 같으면
+		    				  hiddenWord.setCharAt(j, '_'); 
+		                                    // j번째 글자를 -로 바꿈.
+		    		  }
+		    	  }
+		    	  
+	    		  go();
+	    		  
+	    		  printMessage("☆ 게임이 종료되었습니다 ☆ \n");
+		      
+		  }
+		      
+		     
+	      
+	      void go(){
+	    	  failCount = 0;
+	    	  char key;
+	    	  do{
+	    		  print(failCount);
+	    		  
+	    		  if(failCount == 6){
+//	    			  System.out.println("YOU FAILED");
+	    			  printMessage("== YOU FAILED == \n");
+	    			  break;
+	    		  }
+	    		  
+//	    		  System.out.println(hiddenWord);
+	    		  printMessage(hiddenWord.toString());
+//	    		  System.out.print(">>");
+	    		  printMessage("입력하세요 >> \n");
+	    		  
+	    		  String text = "";
+	    		  if (chatMsg != null) {
+	    			  text = chatMsg;
+	    			  chatMsg = null;
+	    		  }
+//	    		  String text = scanner.next();
+	    		  key = text.charAt(0); 
+	                  // 입력받은 문자열에서 가장앞에있는것만 뽑아냄.
+	    	  } while(!complete(key));
+	    	  
+//	    	  System.out.println("Word >> "+newWord);
+	    	  printMessage("Word >> "+newWord);
+	      }
+	      
+	      
+	      // 맞추는 부분
+	      boolean complete(char key){
+	    	  boolean hit = false;
+	    	  for(int i=0; i<newWord.length(); i++){
+	    		  if(hiddenWord.charAt(i)=='-'&&newWord.charAt(i)==key){
+	    			  // i번째 빈칸의 글자를 맞춘경우.
+	    			  hiddenWord.setCharAt(i, key); // I를 key로 바꿈.
+	    			  hit = true;
+	    			  printMessage(" - 정답입니다! - (남은 도전 횟수: " + (5-failCount)  + ") \n");
+	    			  System.out.println(" - 정답입니다! - (남은 도전 횟수: " + (5-failCount)  + ")");
+	    		  }
+	    	  }
+	    	  
+	    	  if(!hit) { // hit이 false면 카운트 증가.
+	    		  failCount++;
+	    		  printMessage(" - 오답입니다... - (남은 도전 횟수: " + (5-failCount)  + ") \n");
+	    		  System.out.println(" - 오답입니다... - (남은 도전 횟수: " + (5-failCount)  + ")");
+	    	  }
+	    	  for(int i=0; i<newWord.length(); i++){
+	    		  if(hiddenWord.charAt(i) == '_') // 단어에 빈칸이있는지 검사
+	    			  return false; // 빈칸이있으면 false를 반환. while문지속.
+	    	  }
+	    	  return true; //빈칸검사했는데 빈칸없으면 true반환. while탈출.
+	      } 
+	      
+	      
+	      public void print(int num) {
+	    	  if (num == 0) {
+	    		  	printMessage("   ____________ \n");
+    		  		printMessage("   | \n");
+    		  		printMessage("   | \n");
+    		  		printMessage("   | \n");
+    		  		printMessage("   | \n");
+    		  		printMessage("   | \n");
+    		  		printMessage("   | \n");
+    		  		printMessage("   | \n");
+    		  		printMessage("___|___ \n\n");
+	    	  }
+	    	  
+	    	  else if (num == 1) {
+					printMessage("   ____________ \n");
+					printMessage("   |          _|_ \n");
+					printMessage("   |         /   \\ \n");
+					printMessage("   |        |     | \n");
+					printMessage("   |         \\_ _/ \n");
+					printMessage("   | \n");
+					printMessage("   | \n");
+					printMessage("   | \n");
+					printMessage("___|___ \n\n");
+	    	  }
+	    	  
+	    	  else if (num == 2) {
+					printMessage("   ____________ \n");
+					printMessage("   |          _|_ \n");
+					printMessage("   |         /   \\ \n");
+					printMessage("   |        |     | \n");
+					printMessage("   |         \\_ _/ \n");
+					printMessage("   |          _| \n");
+					printMessage("   |         / | \n");
+					printMessage("   | \n");
+					printMessage("___|___ \n\n");
+	    	  }
+	    	  
+	    	  else if (num == 3) {
+					printMessage("   ____________ \n");
+					printMessage("   |          _|_ \n");
+					printMessage("   |         /   \\ \n");
+					printMessage("   |        |     | \n");
+					printMessage("   |         \\_ _/ \n");
+					printMessage("   |          _|_ \n");
+					printMessage("   |         / | \\ \n");
+					printMessage("   | \n");
+					printMessage("___|___ \n\n");
+	    	  }
+	    	  
+	    	  else if (num == 4) {
+					printMessage("   ____________ \n");
+					printMessage("   |          _|_ \n");
+					printMessage("   |         /   \\ \n");
+					printMessage("   |        |     | \n");
+					printMessage("   |         \\_ _/ \n");
+					printMessage("   |          _|_ \n");
+					printMessage("   |         / | \\ \n");
+					printMessage("   |          /  \n");
+					printMessage("___|___      /    \n");
+	    	  }
+	    	  
+	    	  else if (num == 5) {
+					printMessage("   ____________ \n");
+					printMessage("   |          _|_ \n");
+					printMessage("   |         /   \\ \n");
+					printMessage("   |        |     | \n");
+					printMessage("   |         \\_ _/ \n");
+					printMessage("   |          _|_ \n");
+					printMessage("   |         / | \\ \n");
+					printMessage("   |          / \\  \n");
+					printMessage("___|___      /   \\ \n");
+	    	  }
+	    	  
+	      }
+	      
+	}
+
+
+	class Words{
+		final int WORDMAX = 10; // 파일에 들은 단어 개수
+		private String fileName;
+		private Random ran = new Random(); // 난수발생.
+		
+		public Words(String fileName){
+			this.fileName = fileName;
+		}
+		
+		public String getRandomWord(){
+			BufferedReader in = null;
+			
+			try {
+				in = new BufferedReader(new FileReader(fileName));
+			}
+			catch (FileNotFoundException e){
+				System.out.println("파일을 찾을 수 없습니다. \n");
+				printMessage("파일을 찾을 수 없습니다. \n");
+				System.exit(0); // 시스템 종료.
+			}
+			
+			int n = ran.nextInt(WORDMAX); // 랜덤 라인번호 생성.
+			return readWord(in, n); // 파일에서 n번째 라인 단어 읽어서 반환.
+		}
+		
+		private String readWord(BufferedReader in, int n){
+			String line= null; // 단어를 저장할 객체. 한라인에 한 단어.
+			try{
+				while(n>0){
+					line = in.readLine();
+					if(line == null){
+						break;
+					}
+					n--;
+				}
+			}
+			catch (IOException e){
+				System.exit(0);
+			}
+			
+			return line; // n번째 라인의 단어 반환.
+		}
+	}
+	
 
 }
