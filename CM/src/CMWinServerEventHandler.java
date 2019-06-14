@@ -136,28 +136,42 @@ public class CMWinServerEventHandler implements CMEventHandler {
 		}
 	}
 	
+	public String getLevelName(String groupName) {
+		String text = "";
+		
+		if (groupName.equals("g1"))
+			text = "대기실";
+		else if (groupName.equals("g2"))
+			text = "초급 단계";
+		else if (groupName.equals("g3"))
+			text = "중급 단계";
+		else if (groupName.equals("g4"))
+			text = "고급 단계";
+		
+		return text;
+	}
+	
 	private void processInterestEvent(CMEvent cme)
 	{
 		CMInterestEvent ie = (CMInterestEvent) cme;
+		String text = getLevelName(ie.getHandlerGroup().trim());
 		switch(ie.getID())
 		{
 		case CMInterestEvent.USER_ENTER:
-			//System.out.println("["+ie.getUserName()+"] enters group("+ie.getCurrentGroup()+") in session("
-			//		+ie.getHandlerSession()+").");
-			printMessage("["+ie.getUserName()+"] enters group("+ie.getCurrentGroup()+") in session("
-					+ie.getHandlerSession()+").\n");
+//			text = getLevelName(ie.getHandlerGroup().toString());
+			System.out.println("["+ie.getUserName()+"] 님이 " + text + "에 입장하셨습니다.");
+			printMessage("["+ie.getUserName()+"] 님이 " + text + "에 입장하셨습니다. \n");
 			break;
 		case CMInterestEvent.USER_LEAVE:
-			//System.out.println("["+ie.getUserName()+"] leaves group("+ie.getHandlerGroup()+") in session("
-			//		+ie.getHandlerSession()+").");
-			printMessage("["+ie.getUserName()+"] leaves group("+ie.getHandlerGroup()+") in session("
-					+ie.getHandlerSession()+").\n");
+//			text = getLevelName(ie.getHandlerGroup().toString());
+			System.out.println("["+ie.getUserName()+"] 님이 " + text + "에서 퇴장하셨습니다.");
+			printMessage("["+ie.getUserName()+"] 님이 " + text + "에서 퇴장하셨습니다. \n");
 			break;
 		case CMInterestEvent.USER_TALK:
 			//System.out.println("("+ie.getHandlerSession()+", "+ie.getHandlerGroup()+")");
-			printMessage("("+ie.getHandlerSession()+", "+ie.getHandlerGroup()+")\n");
+//			printMessage("("+ie.getHandlerSession()+" / "+ie.getHandlerGroup()+")\n");
 			//System.out.println("<"+ie.getUserName()+">: "+ie.getTalk());
-			printMessage("<"+ie.getUserName()+">: "+ie.getTalk()+"\n");
+			printMessage("[" + text + "] <"+ie.getUserName()+">: "+ie.getTalk()+"\n");
 			break;
 		default:
 			return;

@@ -232,7 +232,7 @@ public class CMWinClientEventHandler implements CMEventHandler{
 		{
 		case CMSessionEvent.LOGIN_ACK:
 			lDelay = System.currentTimeMillis() - m_lStartTime;
-			printMessage("LOGIN_ACK delay: "+lDelay+" ms.\n");
+//			printMessage("LOGIN_ACK delay: "+lDelay+" ms.\n");
 			if(se.isValidUser() == 0)
 			{
 				printMessage("This client fails authentication by the default server!\n");
@@ -243,7 +243,7 @@ public class CMWinClientEventHandler implements CMEventHandler{
 			}
 			else
 			{
-				printMessage("This client successfully logs in to the default server.\n");
+				printMessage("서버 접속 성공! \n");
 				CMInteractionInfo interInfo = m_clientStub.getCMInfo().getInteractionInfo();
 				
 				// Change the title of the client window
@@ -260,30 +260,30 @@ public class CMWinClientEventHandler implements CMEventHandler{
 			break;
 		case CMSessionEvent.SESSION_TALK:
 			//System.out.println("("+se.getHandlerSession()+")");
-			printMessage("("+se.getHandlerSession()+")\n");
+//			printMessage("("+se.getHandlerSession()+")\n");
 			//System.out.println("<"+se.getUserName()+">: "+se.getTalk());
-			printMessage("<"+se.getUserName()+">: "+se.getTalk()+"\n");
+			printMessage("["+se.getUserName()+"]:  "+se.getTalk()+"\n");
 			break;
 		case CMSessionEvent.JOIN_SESSION_ACK:
 			lDelay = System.currentTimeMillis() - m_lStartTime;
-			printMessage("JOIN_SESSION_ACK delay: "+lDelay+" ms.\n");
+//			printMessage("JOIN_SESSION_ACK delay: "+lDelay+" ms.\n");
 			m_client.setButtonsAccordingToClientState();
 			break;
 		case CMSessionEvent.ADD_NONBLOCK_SOCKET_CHANNEL_ACK:
 			if(se.getReturnCode() == 0)
 			{
-				printMessage("Adding a nonblocking SocketChannel("+se.getChannelName()+","+se.getChannelNum()
-						+") failed at the server!\n");
+//				printMessage("Adding a nonblocking SocketChannel("+se.getChannelName()+","+se.getChannelNum()
+//						+") failed at the server!\n");
 			}
 			else
 			{
-				printMessage("Adding a nonblocking SocketChannel("+se.getChannelName()+","+se.getChannelNum()
-						+") succeeded at the server!\n");
+//				printMessage("Adding a nonblocking SocketChannel("+se.getChannelName()+","+se.getChannelNum()
+//						+") succeeded at the server!\n");
 			}
 			break;
 		case CMSessionEvent.ADD_BLOCK_SOCKET_CHANNEL_ACK:
 			lDelay = System.currentTimeMillis() - m_lStartTime;
-			printMessage("ADD_BLOCK_SOCKET_CHANNEL_ACK delay: "+lDelay+" ms.\n");
+//			printMessage("ADD_BLOCK_SOCKET_CHANNEL_ACK delay: "+lDelay+" ms.\n");
 			if(se.getReturnCode() == 0)
 			{
 				printMessage("Adding a blocking socket channel ("+se.getChannelName()+","+se.getChannelNum()
@@ -291,8 +291,8 @@ public class CMWinClientEventHandler implements CMEventHandler{
 			}
 			else
 			{
-				printMessage("Adding a blocking socket channel("+se.getChannelName()+","+se.getChannelNum()
-					+") succeeded at the server!\n");
+//				printMessage("Adding a blocking socket channel("+se.getChannelName()+","+se.getChannelNum()
+//					+") succeeded at the server!\n");
 			}
 			break;
 		case CMSessionEvent.REMOVE_BLOCK_SOCKET_CHANNEL_ACK:
@@ -386,31 +386,52 @@ public class CMWinClientEventHandler implements CMEventHandler{
 		{
 		case CMInterestEvent.USER_TALK:
 			//System.out.println("("+ie.getHandlerSession()+", "+ie.getHandlerGroup()+")");
-			printMessage("("+ie.getHandlerSession()+", "+ie.getHandlerGroup()+")\n");
+//			printMessage("("+ie.getHandlerSession()+", "+ie.getHandlerGroup()+")\n");
 			//System.out.println("<"+ie.getUserName()+">: "+ie.getTalk());
-			printMessage("<"+ie.getUserName()+">: "+ie.getTalk()+"\n");
+			printMessage("["+ie.getUserName()+"]:  "+ie.getTalk()+"\n");
 			break;
 		default:
 			return;
 		}
 	}
 	
+	public String getLevelName(String groupName) {
+		String text = "";
+		
+		if (groupName.equals("g1"))
+			text = "대기실";
+		else if (groupName.equals("g2"))
+			text = "초급 단계";
+		else if (groupName.equals("g3"))
+			text = "중급 단계";
+		else if (groupName.equals("g4"))
+			text = "고급 단계";
+		
+		return text;
+	}
+	
 	private void processDataEvent(CMEvent cme)
 	{
 		CMDataEvent de = (CMDataEvent) cme;
+		String text = getLevelName(de.getHandlerGroup().trim());
+		
 		switch(de.getID())
 		{
 		case CMDataEvent.NEW_USER:
-			//System.out.println("["+de.getUserName()+"] enters group("+de.getHandlerGroup()+") in session("
-			//		+de.getHandlerSession()+").");
-			printMessage("["+de.getUserName()+"] enters group("+de.getHandlerGroup()+") in session("
-					+de.getHandlerSession()+").\n");
+
+//			text = de.getHandlerGroup();
+//			text = getLevelName(de.getHandlerGroup());		
+			System.out.println("["+de.getUserName()+"] 님이 " + text + "에 입장하셨습니다.");
+			printMessage("["+de.getUserName()+"] 님이 " + text + "에 입장하셨습니다. \n");
 			break;
 		case CMDataEvent.REMOVE_USER:
+//			text = getLevelName(de.getHandlerGroup());
+			System.out.println("["+de.getUserName()+"] 님이 " + text + "에서 퇴장하셨습니다.");
+			printMessage("["+de.getUserName()+"] 님이 " + text + "에서 퇴장하셨습니다. \n");
 			//System.out.println("["+de.getUserName()+"] leaves group("+de.getHandlerGroup()+") in session("
 			//		+de.getHandlerSession()+").");
-			printMessage("["+de.getUserName()+"] leaves group("+de.getHandlerGroup()+") in session("
-					+de.getHandlerSession()+").\n");
+//			printMessage("["+de.getUserName()+"] leaves group("+de.getHandlerGroup()+") in session("
+//					+de.getHandlerSession()+").\n");
 			break;
 		default:
 			return;

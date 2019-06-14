@@ -361,6 +361,7 @@ public class CMSessionManager {
 			System.out.println("CMSessionManager.processSESSION_TALK(), casted by user("
 					+se.getUserName()+"), session("+se.getDistributionSession()+").");
 			System.out.println("chat: "+se.getTalk());
+			
 			se = null;
 		}
 		

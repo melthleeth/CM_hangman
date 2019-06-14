@@ -118,18 +118,34 @@ public class CMServerEventHandler implements CMEventHandler {
 		}
 	}
 	
+	public String getLevelName(String groupName) {
+		String text = "";
+		
+		if (groupName == "g1")
+			text = "대기실";
+		else if (groupName == "g2")
+			text = "초급 단계";
+		else if (groupName == "g2")
+			text = "중급 단계";
+		else if (groupName == "g2")
+			text = "고급 단계";
+		
+		return text;
+	}
+	
 	private void processInterestEvent(CMEvent cme)
 	{
 		CMInterestEvent ie = (CMInterestEvent) cme;
+		String text = "";
 		switch(ie.getID())
 		{
 		case CMInterestEvent.USER_ENTER:
-			System.out.println("["+ie.getUserName()+"] enters group("+ie.getCurrentGroup()+") in session("
-					+ie.getHandlerSession()+").");
+			text = getLevelName(ie.getCurrentGroup());
+			System.out.println("["+ie.getUserName()+"] 님이" + text + "에 입장하셨습니다.");
 			break;
 		case CMInterestEvent.USER_LEAVE:
-			System.out.println("["+ie.getUserName()+"] leaves group("+ie.getHandlerGroup()+") in session("
-					+ie.getHandlerSession()+").");
+			text = getLevelName(ie.getCurrentGroup());
+			System.out.println("["+ie.getUserName()+"] 님이" + text + "에서 퇴장하셨습니다.");
 			break;
 		default:
 			return;

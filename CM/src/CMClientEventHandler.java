@@ -343,11 +343,11 @@ public class CMClientEventHandler implements CMEventHandler {
 		switch(de.getID())
 		{
 		case CMDataEvent.NEW_USER:
-			System.out.println("["+de.getUserName()+"] enters group("+de.getHandlerGroup()+") in session("
-					+de.getHandlerSession()+").");
+			System.out.println("["+de.getUserName()+"] 님이 초급단계("+de.getHandlerGroup()+")에 입장하셨습니다.");
+			// session("+de.getHandlerSession()+").
 			break;
 		case CMDataEvent.REMOVE_USER:
-			System.out.println("["+de.getUserName()+"] leaves group("+de.getHandlerGroup()+") in session("
+			System.out.println("["+de.getUserName()+"] 님이 초급단계("+de.getHandlerGroup()+") in session("
 					+de.getHandlerSession()+").");
 			break;
 		default:

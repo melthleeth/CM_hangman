@@ -38,14 +38,19 @@ import kr.ac.konkuk.ccslab.cm.manager.CMFileTransferManager;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 import kr.ac.konkuk.ccslab.cm.util.CMUtil;
 
-public class CMWinClient extends JFrame {
+public class CMWinClient extends JFrame implements ActionListener {
 
+	Game game;
+	String userName = "";
+	
 	private static final long serialVersionUID = 1L;
 	//private JTextArea m_outTextArea;
 	private JTextPane m_outTextPane;
 	private JTextField m_inTextField;
 	private JButton m_startStopButton;
 	private JButton m_loginLogoutButton;
+	private JButton m_clearButton, m_levelButton1, m_levelButton2, m_levelButton3, m_leaveButton;
+	private JPanel m_hangmanPanel;
 	//private JPanel m_leftButtonPanel;
 	//private JScrollPane m_westScroll;
 	private JButton m_composeSNSContentButton;
@@ -67,12 +72,16 @@ public class CMWinClient extends JFrame {
 		MyKeyListener cmKeyListener = new MyKeyListener();
 		MyActionListener cmActionListener = new MyActionListener();
 		cmMouseListener = new MyMouseListener();
-		setTitle("CM Client");
-		setSize(600, 600);
+		setTitle("Hangman Game");
+		setSize(800, 600);
+		Toolkit tool = Toolkit.getDefaultToolkit();
+		Dimension screen = tool.getScreenSize();
+		this.setLocation(screen.width/4, screen.height/4);
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		setMenus();
-		setLayout(new BorderLayout());
+//		setMenus();
+		getContentPane().setLayout(new BorderLayout());
 
 		m_outTextPane = new JTextPane();
 		m_outTextPane.setBackground(new Color(245,245,245));
@@ -81,20 +90,26 @@ public class CMWinClient extends JFrame {
 
 		StyledDocument doc = m_outTextPane.getStyledDocument();
 		addStylesToDocument(doc);
-		add(m_outTextPane, BorderLayout.CENTER);
+		getContentPane().add(m_outTextPane, BorderLayout.CENTER);
 		JScrollPane centerScroll = new JScrollPane (m_outTextPane, 
 				   JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		//add(centerScroll);
 		getContentPane().add(centerScroll, BorderLayout.CENTER);
 		
 		m_inTextField = new JTextField();
-		m_inTextField.addKeyListener(cmKeyListener);
-		add(m_inTextField, BorderLayout.SOUTH);
+		m_inTextField.addActionListener(this);
+		getContentPane().add(m_inTextField, BorderLayout.SOUTH);
+		
+		JPanel panel = new JPanel();
+		getContentPane().add(panel, BorderLayout.NORTH);
+		
+		JPanel m_hangmanPanel = new JPanel();
+		
 		
 		JPanel topButtonPanel = new JPanel();
 		topButtonPanel.setBackground(new Color(220,220,220));
 		topButtonPanel.setLayout(new FlowLayout());
-		add(topButtonPanel, BorderLayout.NORTH);
+		getContentPane().add(topButtonPanel, BorderLayout.NORTH);
 		
 		m_startStopButton = new JButton("Start Client CM");
 		//m_startStopButton.setBackground(Color.LIGHT_GRAY);	// not work on Mac
@@ -102,9 +117,37 @@ public class CMWinClient extends JFrame {
 		//add(startStopButton, BorderLayout.NORTH);
 		topButtonPanel.add(m_startStopButton);
 		
-		m_loginLogoutButton = new JButton("Login");
+		m_loginLogoutButton = new JButton("유저 로그인");
 		m_loginLogoutButton.addActionListener(cmActionListener);
 		topButtonPanel.add(m_loginLogoutButton);
+		
+		// 게임방 나가기 (g1으로 변경)
+		m_leaveButton = new JButton("대기실");
+		m_leaveButton.addActionListener(this);
+		m_leaveButton.setVisible(false);
+		topButtonPanel.add(m_leaveButton);
+		
+		// 난이도: 초급(g2), 중급(g3), 고급(g4)
+		m_levelButton1 = new JButton("초급");
+		m_levelButton1.addActionListener(this);
+		m_levelButton1.setVisible(false);
+		topButtonPanel.add(m_levelButton1);
+		
+		m_levelButton2 = new JButton("중급");
+		m_levelButton2.addActionListener(this);
+		m_levelButton2.setVisible(false);
+		topButtonPanel.add(m_levelButton2);
+		
+		m_levelButton3 = new JButton("고급");
+		m_levelButton3.addActionListener(this);
+		m_levelButton3.setVisible(false);
+		topButtonPanel.add(m_levelButton3);
+	
+		// 현재 나와있는 텍스트 지우기
+		m_clearButton = new JButton("clear");
+		m_clearButton.addActionListener(this);
+		topButtonPanel.add(m_clearButton);
+		
 		
 		/*
 		m_leftButtonPanel = new JPanel();
@@ -473,7 +516,7 @@ public class CMWinClient extends JFrame {
 	public void initializeButtons()
 	{
 		m_startStopButton.setText("Start Client CM");
-		m_loginLogoutButton.setText("Login");
+		m_loginLogoutButton.setText("유저 로그인");
 		//m_leftButtonPanel.setVisible(false);
 		//m_westScroll.setVisible(false);
 		revalidate();
@@ -491,31 +534,31 @@ public class CMWinClient extends JFrame {
 		{
 		case CMInfo.CM_INIT:
 			m_startStopButton.setText("Stop Client CM");
-			m_loginLogoutButton.setText("Login");
+			m_loginLogoutButton.setText("유저 로그인");
 			//m_leftButtonPanel.setVisible(false);
 			//m_westScroll.setVisible(false);
 			break;
 		case CMInfo.CM_CONNECT:
 			m_startStopButton.setText("Stop Client CM");
-			m_loginLogoutButton.setText("Login");
+			m_loginLogoutButton.setText("유저 로그인");
 			//m_leftButtonPanel.setVisible(false);
 			//m_westScroll.setVisible(false);
 			break;
 		case CMInfo.CM_LOGIN:
 			m_startStopButton.setText("Stop Client CM");
-			m_loginLogoutButton.setText("Logout");
+			m_loginLogoutButton.setText("로그아웃");
 			//m_leftButtonPanel.setVisible(false);
 			//m_westScroll.setVisible(false);
 			break;
 		case CMInfo.CM_SESSION_JOIN:
 			m_startStopButton.setText("Stop Client CM");
-			m_loginLogoutButton.setText("Logout");
+			m_loginLogoutButton.setText("로그아웃");
 			//m_leftButtonPanel.setVisible(true);
 			//m_westScroll.setVisible(true);
 			break;
 		default:
 			m_startStopButton.setText("Start Client CM");
-			m_loginLogoutButton.setText("Login");
+			m_loginLogoutButton.setText("유저 로그인");
 			//m_leftButtonPanel.setVisible(false);
 			//m_westScroll.setVisible(false);
 			break;
@@ -533,6 +576,7 @@ public class CMWinClient extends JFrame {
 		StyledDocument doc = m_outTextPane.getStyledDocument();
 		try {
 			doc.insertString(doc.getLength(), strText, null);
+			
 			m_outTextPane.setCaretPosition(m_outTextPane.getDocument().getLength());
 
 		} catch (BadLocationException e) {
@@ -921,14 +965,14 @@ public class CMWinClient extends JFrame {
 		String strPassword = null;
 		boolean bRequestResult = false;
 
-		printMessage("====== login to default server\n");
+		printMessage("====== 서버에 로그인중 \n");
 		JTextField userNameField = new JTextField();
 		JPasswordField passwordField = new JPasswordField();
 		Object[] message = {
-				"User Name:", userNameField,
-				"Password:", passwordField
+				"닉네임 입력:", userNameField,
+//				"Password:", passwordField
 		};
-		int option = JOptionPane.showConfirmDialog(null, message, "Login Input", JOptionPane.OK_CANCEL_OPTION);
+		int option = JOptionPane.showConfirmDialog(null, message, "유저 등록", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION)
 		{
 			strUserName = userNameField.getText();
@@ -941,6 +985,14 @@ public class CMWinClient extends JFrame {
 			{
 				printMessage("successfully sent the login request.\n");
 				printMessage("return delay: "+lDelay+" ms.\n");
+				
+				// 게임버튼, 채팅버튼 활성화
+				userName = strUserName;
+				buttonVisible(true);
+				m_outTextPane.setText("");
+//				m_GameButton.setVisible(true);
+//				m_chatButton.setVisible(true);
+				
 			}
 			else
 			{
@@ -992,7 +1044,7 @@ public class CMWinClient extends JFrame {
 					CMInteractionInfo interInfo = m_clientStub.getCMInfo().getInteractionInfo();
 					
 					// Change the title of the client window
-					setTitle("CM Client ("+interInfo.getMyself().getName()+")");
+					setTitle("Hangman Game ("+interInfo.getMyself().getName()+")");
 
 					// Set the appearance of buttons in the client frame window
 					setButtonsAccordingToClientState();
@@ -1011,10 +1063,15 @@ public class CMWinClient extends JFrame {
 	public void testLogoutDS()
 	{
 		boolean bRequestResult = false;
-		printMessage("====== logout from default server\n");
+		printMessage("====== 로그아웃 ");
 		bRequestResult = m_clientStub.logoutCM();
-		if(bRequestResult)
-			printMessage("successfully sent the logout request.\n");
+		if(bRequestResult) {
+//			printMessage("successfully sent the logout request.\n");
+			printMessage("완료 \n");
+			
+			// 게임버튼들 비활성화
+			buttonVisible(false);
+		}
 		else
 			printStyledMessage("failed the logout request!\n", "bold");
 		printMessage("======\n");
@@ -1265,7 +1322,7 @@ public class CMWinClient extends JFrame {
 		String strTarget = null;
 		String strMessage = null;
 		//System.out.println("====== chat");
-		printMessage("====== chat\n");
+		printMessage("====== chat (no msg is sent)\n");
 		/*
 		System.out.print("target(/b, /s, /g, or /username): ");
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -1287,20 +1344,32 @@ public class CMWinClient extends JFrame {
 		JTextField targetField = new JTextField();
 		JTextField messageField = new JTextField();
 		Object[] message = {
-				"Target(/b, /s, /g, or /username): ", targetField,
-				"Message: ", messageField
+				//"Target(/b, /s, /g, or /username): ", targetField,
+				"알파벳 입력: ", messageField
 		};
-		int option = JOptionPane.showConfirmDialog(null, message, "Chat Input", JOptionPane.OK_CANCEL_OPTION);
+		int option = JOptionPane.showConfirmDialog(null, message, "입력하기", JOptionPane.OK_CANCEL_OPTION);
 		if(option == JOptionPane.OK_OPTION)
 		{
-			strTarget = targetField.getText();
+//			strTarget = targetField.getText();
+			
+			// group으로 제한
+			strTarget = "/g";
 			strMessage = messageField.getText();
 			m_clientStub.chat(strTarget, strMessage);
+			// 게임부분 텍스트
+			//String txt = "<" + userName + ">dh: " + strMessage + "\n";
+			
+			// 유저 이름 설정
+			game.setUserName(userName);
+			//game.textArea.append(txt);
+			
 		}
 		
 		//System.out.println("======");
 		printMessage("======\n");
 	}
+	
+	
 
 	public void testDummyEvent()
 	{
@@ -3119,6 +3188,10 @@ public class CMWinClient extends JFrame {
 				String strPassword = new String(passwordField.getPassword()); // security problem?
 
 				m_clientStub.loginCM(user, strPassword);
+				
+				// 유저이름 설정
+				game.setUserName(user);
+				System.out.println("user name: " + user);
 			}
 		}
 		else // use the login info for the default server
@@ -4019,12 +4092,12 @@ public class CMWinClient extends JFrame {
 			{
 				testTerminateCM();
 			}
-			else if(button.getText().equals("Login"))
+			else if(button.getText().equals("유저 로그인"))
 			{
 				// login to the default cm server
 				testLoginDS();
 			}
-			else if(button.getText().equals("Logout"))
+			else if(button.getText().equals("로그아웃"))
 			{
 				// logout from the default cm server
 				testLogoutDS();
@@ -4358,6 +4431,40 @@ public class CMWinClient extends JFrame {
 		CMWinClient client = new CMWinClient();
 		CMClientStub cmStub = client.getClientStub();
 		cmStub.setEventHandler(client.getClientEventHandler());
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == m_clearButton) {
+			m_outTextPane.setText("");
+		}
+		else if (e.getSource() == m_inTextField) {
+			
+			m_clientStub.chat("/g", m_inTextField.getText());
+		}
+		
+		else if (e.getSource() == m_levelButton1) {
+			m_clientStub.changeGroup("g2");	
+		}
+		else if (e.getSource() == m_levelButton2) {
+			m_clientStub.changeGroup("g3");	
+		}
+		else if (e.getSource() == m_levelButton3) {
+			m_clientStub.changeGroup("g4");	
+		}
+		else if (e.getSource() == m_leaveButton) {
+			m_clientStub.changeGroup("g1");
+		}
+		
+		
+		
+	}
+	
+	public void buttonVisible(boolean status) {
+		m_levelButton1.setVisible(status);
+		m_levelButton2.setVisible(status);
+		m_levelButton3.setVisible(status);
+		m_leaveButton.setVisible(status);
 	}
 
 }
